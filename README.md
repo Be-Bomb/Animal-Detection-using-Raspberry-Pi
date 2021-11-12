@@ -28,6 +28,6 @@ python cam.py
 * `zm` module 관련 에러: 이것도 위와 같이 설치
 
 
->reference
-> https://github.com/jeffbass/imagezmq    
-> https://github.com/kairess/cctv_raspberrypi
+>reference    
+>> https://github.com/jeffbass/imagezmq    
+>> https://github.com/kairess/cctv_raspberrypi
