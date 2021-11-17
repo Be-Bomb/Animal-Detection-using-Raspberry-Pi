@@ -11,7 +11,7 @@
 프로그램을 실행시키기 위하여 아래의 코드를 터미널에 입력하여 라이브러리들을 설치한다.
 
 ```Shell
-pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
 # How to use
@@ -28,7 +28,7 @@ pip3 install -r requirements.txt
 ### optional arguments
 
 ```Shell
-python3 server.py -h
+$ python3 server.py -h
 optional arguments:
   -h, --help            show this help message and exit
   --input INPUT         input video
@@ -43,17 +43,17 @@ optional arguments:
 ```
 
 ```Shell
-python3 server.py --input {input}
+$ python3 server.py --input {input}
 
-e.g. python3 server.py
-     python3 server.py --input 0
-     python3 server.py --input data/car_on_road.mp4
+e.g. $ python3 server.py
+     $ python3 server.py --input 0
+     $ python3 server.py --input data/car_on_road.mp4
 ```
 
 ### Real use
 
 ```Shell
-python3 server.py
+$ python3 server.py
 ```
 
 ## 2. Raspberry Pi
@@ -61,7 +61,7 @@ python3 server.py
 ### optional arguments
 
 ```Shell
-python3 cam.py -h
+$ python3 cam.py -h
 optional arguments:
   -h, --help  show this help message and exit
   --ip IP     ip
@@ -70,9 +70,9 @@ optional arguments:
 ### Real use
 
 ```Shell
-python3 cam.py --ip {server_ip}
+$ python3 cam.py --ip {server_ip}
 
-e.g. python3 cam.py --ip 192.168.0.19
+e.g. $ python3 cam.py --ip 192.168.0.19
 ```
 
 # Reference
