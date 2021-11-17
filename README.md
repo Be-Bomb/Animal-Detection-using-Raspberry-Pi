@@ -25,11 +25,49 @@ pip3 install -r requirements.txt
 
 ## 1. Server
 
+### optional arguments
+
+```Shell
+python3 server.py -h
+optional arguments:
+  -h, --help            show this help message and exit
+  --input INPUT         input video
+  --weights WEIGHTS     yolo weights
+  --configure CONFIGURE
+                        yolo configure
+  --label LABEL         coco class label
+  --confidence CONFIDENCE
+                        minimum confidence
+  --threshold THRESHOLD
+                        minimum threshold
+```
+
+```Shell
+python3 server.py --input {input}
+
+e.g. python3 server.py
+     python3 server.py --input 0
+     python3 server.py --input data/car_on_road.mp4
+```
+
+### Real use
+
 ```Shell
 python3 server.py
 ```
 
 ## 2. Raspberry Pi
+
+### optional arguments
+
+```Shell
+python3 cam.py -h
+optional arguments:
+  -h, --help  show this help message and exit
+  --ip IP     ip
+```
+
+### Real use
 
 ```Shell
 python3 cam.py --ip {server_ip}
