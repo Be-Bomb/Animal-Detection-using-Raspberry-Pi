@@ -1,5 +1,9 @@
 # Animal Detection using Raspberry Pi
 
+![](data/sample.png)
+
+라즈베리 파이에서 동영상을 촬영하고, 이를 서버에서 받아 Object Detection을 하는 프로그램입니다.
+
 [imagezmq](https://github.com/jeffbass/imagezmq)를 사용하여 파이 카메라로 촬영된 영상을 PC 서버로 가져온다.
 
 **`pi-server`**: **라즈베리파이에 다운로드**한다. 파이 카메라로부터 촬영된 영상을 직접 가져와 PC서버로 전송한다.
@@ -29,6 +33,10 @@ $ pip3 install -r requirements.txt
 
 ```Shell
 $ python3 server.py -h
+usage: server.py [-h] [--input INPUT] [--weights WEIGHTS] [--configure CONFIGURE] [--label LABEL] [--confidence CONFIDENCE] [--threshold THRESHOLD]
+
+Server gets Raspberry pi's capture through zmq
+
 optional arguments:
   -h, --help            show this help message and exit
   --input INPUT         input video
@@ -62,9 +70,13 @@ $ python3 server.py
 
 ```Shell
 $ python3 cam.py -h
+usage: cam.py [-h] --ip IP
+
+Raspberry pi passes its video capture to server
+
 optional arguments:
   -h, --help  show this help message and exit
-  --ip IP     ip
+  --ip IP     server IP that we want to pass
 ```
 
 ### Real use
