@@ -7,7 +7,6 @@ from datetime import datetime
 
 class Yolo:
     def __init__(self, args):
-        # 객체를 탐지할 확률
         self.args = args
 
         # YOLO 모델이 학습된 coco 클래스 레이블
@@ -90,10 +89,9 @@ class Yolo:
                         detected = True
 
                         # bounding box 위치 계산
+                        # (중심 좌표 X, 중심 좌표 Y, 너비(가로), 높이(세로))
                         box = detection[0:4] * np.array([W, H, W, H])
-                        (centerX, centerY, width, height) = box.astype(
-                            "int"
-                        )  # (중심 좌표 X, 중심 좌표 Y, 너비(가로), 높이(세로))
+                        (centerX, centerY, width, height) = box.astype("int")
 
                         # bounding box 왼쪽 위 좌표
                         x = int(centerX - (width / 2))

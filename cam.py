@@ -6,7 +6,6 @@ import argparse
 
 
 def main(args):
-    # connect_to='tcp://각자 노트북 ip주소 입력:5555'
     sender = imagezmq.ImageSender(connect_to="tcp://{}:5555".format(args.ip))
 
     rpi_name = socket.gethostname()  # send RPi hostname with each image
@@ -20,8 +19,18 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", default=None, type=str, required=True, help="ip")
+    parser = argparse.ArgumentParser(
+        description="Raspberry pi passes its video capture to server"
+    )
+
+    parser.add_argument(
+        "--ip",
+        default=None,
+        type=str,
+        required=True,
+        help="server IP that we want to pass",
+    )
+
     args = parser.parse_args()
 
     main(args)

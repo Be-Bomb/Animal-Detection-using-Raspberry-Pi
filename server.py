@@ -1,5 +1,4 @@
 import argparse
-import cv2
 from flask import Flask, render_template, Response
 from yolo import Yolo
 
@@ -21,9 +20,11 @@ def index():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Server gets Raspberry pi's capture through zmq"
+    )
 
-    parser.add_argument("--input", type=str, default="pi", help="input video")
+    parser.add_argument("--input", type=str, default="0", help="input video")
     parser.add_argument(
         "--weights", type=str, default="data/yolov4_tiny.weights", help="yolo weights"
     )
