@@ -73,7 +73,9 @@ class Yolo:
             boxes = []
 
             # counting 수 초기
-            object_count = 0
+            people_count = 0
+            boar_count = 0
+            deer_count = 0
 
             # layer_outputs 반복
             for output in layer_outputs:
@@ -116,7 +118,12 @@ class Yolo:
             for i in range(len(boxes)):
                 if i in indexes:
                     # counting 수 증가
-                    object_count += 1
+                    if self.LABELS[class_ids[i]] == "person":
+                        people_count += 1
+                    elif self.LABELS[class_ids[i]] == "boar":
+                        boar_count += 1
+                    elif self.LABELS[class_ids[i]] == "deer":
+                        deer_count += 1
 
                     # bounding box 좌표 추출
                     x, y, w, h = boxes[i]
@@ -151,7 +158,7 @@ class Yolo:
                     )
 
             # counting 결과 출력
-            counting_text = f"People Counting : {object_count}"
+            counting_text = f"People Counting : {people_count}"
             cv2.putText(
                 frame,
                 text=counting_text,
