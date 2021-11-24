@@ -53,9 +53,9 @@ optional arguments:
 ```Shell
 $ python3 server.py --input {input}
 
-e.g. $ python3 server.py            # 라즈베리 파이에서 영상 송출
-     $ python3 server.py --input 0  # 현재 pc에 연결된 웹캠으로 송출
-     $ python3 server.py --input data/car_on_road.mp4
+e.g. $ python3 server.py            # 현재 pc에 연결된 웹캠으로 송출
+     $ python3 server.py --input pi # 현재 pc에 연결된 웹캠으로 송출
+     $ python3 server.py --input data/car_on_road.mp4 # 동영상 송출
 ```
 
 ### Real use
