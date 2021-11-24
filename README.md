@@ -15,7 +15,7 @@
 프로그램을 실행시키기 위하여 아래의 코드를 터미널에 입력하여 라이브러리들을 설치한다.
 
 ```Shell
-$ pip3 install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 # How to use
@@ -32,7 +32,7 @@ $ pip3 install -r requirements.txt
 ### optional arguments
 
 ```Shell
-$ python3 server.py -h
+python3 server.py -h
 usage: server.py [-h] [--input INPUT] [--weights WEIGHTS] [--configure CONFIGURE] [--label LABEL] [--confidence CONFIDENCE] [--threshold THRESHOLD]
 
 Server gets Raspberry pi's capture through zmq
@@ -51,17 +51,17 @@ optional arguments:
 ```
 
 ```Shell
-$ python3 server.py --input {input}
+python3 server.py --input {input}
 
-e.g. $ python3 server.py            # 현재 pc에 연결된 웹캠으로 송출
-     $ python3 server.py --input pi # 현재 pc에 연결된 웹캠으로 송출
-     $ python3 server.py --input data/car_on_road.mp4 # 동영상 송출
+e.g. python3 server.py              # 현재 pc에 연결된 웹캠으로 송출
+     python3 server.py --input pi   # pi로부터 동영상 받아 송출
+     python3 server.py --input data/car_on_road.mp4 # 동영상 송출
 ```
 
 ### Real use
 
 ```Shell
-$ python3 server.py
+python3 server.py
 ```
 
 ## 2. Raspberry Pi
@@ -69,7 +69,7 @@ $ python3 server.py
 ### optional arguments
 
 ```Shell
-$ python3 cam.py -h
+python3 cam.py -h
 usage: cam.py [-h] --ip IP
 
 Raspberry pi passes its video capture to server
@@ -79,12 +79,16 @@ optional arguments:
   --ip IP     server IP that we want to pass
 ```
 
+```Shell
+python3 cam.py --ip {server_ip}
+
+e.g. python3 cam.py --ip 192.168.0.19
+```
+
 ### Real use
 
 ```Shell
-$ python3 cam.py --ip {server_ip}
-
-e.g. $ python3 cam.py --ip 192.168.0.19
+python3 cam.py --ip 192.168.0.19
 ```
 
 # Reference
