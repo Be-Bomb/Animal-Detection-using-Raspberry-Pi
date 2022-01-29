@@ -21,8 +21,8 @@ class Yolo:
 
         # YOLO에서 필요한 output 레이어 이름
         self.ln = self.net.getLayerNames()
-        # self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
-        self.ln = [self.ln[i - 1] for i in self.net.getUnconnectedOutLayers()]
+        self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
+        # self.ln = [self.ln[i - 1] for i in self.net.getUnconnectedOutLayers()]
 
         self.tracker = Sort()
         self.memory = {}
