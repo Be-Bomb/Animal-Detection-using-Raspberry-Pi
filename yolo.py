@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import imagezmq
 
-from datetime import datetime
+from sort import *
 
 
 class Yolo:
@@ -14,20 +14,22 @@ class Yolo:
             self.LABELS = [line.strip() for line in f.readlines()]
 
         # 객체를 표시할 bounding box와 text의 랜덤 색상
-        self.COLORS = np.random.uniform(0, 255, size=(len(self.LABELS), 3))
+        self.COLORS = np.random.randint(0, 255, size=(200, 3), dtype="uint8")
 
         # COCO 데이터 세트(80 개 클래스)에서 훈련된 YOLO 객체 감지기 load
         self.net = cv2.dnn.readNet(self.args.weights, self.args.configure)
 
         # YOLO에서 필요한 output 레이어 이름
         self.ln = self.net.getLayerNames()
-        self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
+        # self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
+        self.ln = [self.ln[i - 1] for i in self.net.getUnconnectedOutLayers()]
 
-    # Video stream frame을 생성하고 웹으로 전송함.
+        self.tracker = Sort()
+        self.memory = {}
+
+    # Video stream frame을 생성하고 웹으로 전송함
     def gen_frames(self):
-        # 프레임 크기
-        (H, W) = (None, None)
-
+        # 영상선택 pi / 웹캠 / 동영상
         if self.args.input == "pi":
             image_hub = imagezmq.ImageHub()
         elif self.args.input == "0":
@@ -35,148 +37,149 @@ class Yolo:
         else:
             vs = cv2.VideoCapture(self.args.input)
 
-        is_detected = False
+        (W, H) = (None, None)
 
-        # 촬영된 이미지를 웹으로 송출
+        # loop over frames from the video file stream
         while True:
-            detected = False
-
-            # 이미지 가져오기
+            # read the next frame from the file
             if self.args.input == "pi":
-                _, frame = image_hub.recv_image()
+                grabbed, frame = image_hub.recv_image()
             else:
-                _, frame = vs.read()
+                grabbed, frame = vs.read()
 
-            height, width, _ = frame.shape
+            # if the frame was not grabbed, then we have reached the end of the stream
+            if grabbed == False:
+                continue
 
-            # 프레임 크기
-            if W is None or H is None:
-                (H, W) = frame.shape[:2]
+            frame = self.detect(W, H, frame)
 
-            # blob 이미지 생성
-            blob = cv2.dnn.blobFromImage(
-                frame,
-                scalefactor=0.00392,
-                size=(320, 320),
-                mean=(0, 0, 0),
-                swapRB=True,
-                crop=False,
-            )
-
-            # 객체 인식
-            self.net.setInput(blob)
-            layer_outputs = self.net.forward(self.ln)
-
-            # bounding box, 확률 및 클래스 ID 목록 초기화
-            class_ids = []
-            confidences = []
-            boxes = []
-
-            # counting 수 초기
-            people_count = 0
-            boar_count = 0
-            deer_count = 0
-
-            # layer_outputs 반복
-            for output in layer_outputs:
-                # 각 클래스 레이블마다 인식된 객체 수 만큼 반복
-                for detection in output:
-                    # 인식된 객체의 클래스 ID 및 확률 추출
-                    scores = detection[5:]
-                    class_id = np.argmax(scores)
-                    confidence = scores[class_id]
-
-                    # 객체 확률이 최소 확률보다 큰 경우
-                    if confidence > self.args.confidence:
-                        detected = True
-
-                        # bounding box 위치 계산
-                        # (중심 좌표 X, 중심 좌표 Y, 너비(가로), 높이(세로))
-                        box = detection[0:4] * np.array([W, H, W, H])
-                        (centerX, centerY, width, height) = box.astype("int")
-
-                        # bounding box 왼쪽 위 좌표
-                        x = int(centerX - (width / 2))
-                        y = int(centerY - (height / 2))
-
-                        # bounding box, 확률 및 클래스 ID 목록 추가
-                        boxes.append([x, y, int(width), int(height)])
-                        confidences.append(float(confidence))
-                        class_ids.append(class_id)
-
-            # 탐지 -> 비탐지, 비탐지 -> 탐지로 변할 때 콘솔에 출력
-            if is_detected != detected:
-                print(f"now :{datetime.now():}, detected: {detected}")
-                is_detected = detected
-
-            # bounding box가 겹치는 것을 방지(임계값 적용)
-            indexes = cv2.dnn.NMSBoxes(
-                boxes, confidences, self.args.confidence, self.args.threshold
-            )
-
-            # 화면에 출력
-            for i in range(len(boxes)):
-                if i in indexes:
-                    # counting 수 증가
-                    if self.LABELS[class_ids[i]] == "person":
-                        people_count += 1
-                    elif self.LABELS[class_ids[i]] == "boar":
-                        boar_count += 1
-                    elif self.LABELS[class_ids[i]] == "deer":
-                        deer_count += 1
-
-                    # bounding box 좌표 추출
-                    x, y, w, h = boxes[i]
-
-                    # 클래스 ID 및 확률
-                    label_confidence = int(confidences[i] * 100)
-                    text = f"{self.LABELS[class_ids[i]]} {label_confidence}%"
-
-                    # 색상
-                    color = self.COLORS[class_ids[i]]
-
-                    # bounding box 출력
-                    cv2.rectangle(
-                        frame,
-                        pt1=(x, y),
-                        pt2=(x + w, y + h),
-                        thickness=2,
-                        color=color,
-                        lineType=cv2.LINE_AA,
-                    )
-
-                    # text 출력
-                    cv2.putText(
-                        frame,
-                        text=text,
-                        org=(x, y - 10),
-                        fontFace=cv2.FONT_HERSHEY_PLAIN,
-                        fontScale=3,
-                        color=color,
-                        thickness=2,
-                        lineType=cv2.LINE_AA,
-                    )
-
-            # counting 결과 출력
-            counting_text = f"People Counting : {people_count}"
-            cv2.putText(
-                frame,
-                text=counting_text,
-                org=(10, frame.shape[0] - 25),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=0.85,
-                color=(255, 255, 255),
-                thickness=2,
-                lineType=cv2.LINE_AA,
-            )
-
-            _, buffer = cv2.imencode(".jpg", frame)
-
-            frame = buffer.tobytes()
-
-            # pi에서 영상을 받을 경우, pi에게 OK sign을 준다.
-            if self.args.input == "pi":
+            if self.args.input == "pi":  # 파이카메라 영상 송출 부분 (필수)
                 image_hub.send_reply(b"OK")
 
-            # concat frame one by one and show result
             yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
+
+    def detect(self, H, W, frame):
+        # if the frame dimensions are empty, grab them
+        if W is None or H is None:
+            (H, W) = frame.shape[:2]
+
+        # construct a blob from the input frame and then perform a forward
+        # pass of the YOLO object detector, giving us our bounding boxes
+        # and associated probabilities
+        blob = cv2.dnn.blobFromImage(
+            frame,
+            scalefactor=0.00392,
+            size=(416, 416),
+            mean=(0, 0, 0),
+            swapRB=True,
+            crop=False,
+        )
+
+        # 객체 인식
+        self.net.setInput(blob)
+        layerOutputs = self.net.forward(self.ln)
+
+        # initialize our lists of detected bounding boxes, confidences,
+        # and class IDs, respectively
+        boxes = []
+        confidences = []
+        classIDs = []
+
+        # loop over each of the layer outputs
+        for output in layerOutputs:
+            # loop over each of the detections
+            for detection in output:
+                # extract the class ID and confidence (i.e., probability)
+                # of the current object detection
+                scores = detection[5:]
+                classID = np.argmax(scores)
+                confidence = scores[classID]
+
+                # filter out weak predictions by ensuring the detected
+                # probability is greater than the minimum probability
+                if confidence > self.args.confidence:
+                    # scale the bounding box coordinates back relative to
+                    # the size of the image, keeping in mind that YOLO
+                    # actually returns the center (x, y)-coordinates of
+                    # the bounding box followed by the boxes' width and height
+                    # bounding box 위치 계산
+                    # (중심 좌표 X, 중심 좌표 Y, 너비(가로), 높이(세로))x
+                    box = detection[0:4] * np.array([W, H, W, H])
+                    (centerX, centerY, width, height) = box.astype("int")
+
+                    # use the center (x, y)-coordinates to derive the top
+                    # and and left corner of the bounding box
+                    # bounding box 왼쪽 위 좌표
+                    x = int(centerX - (width / 2))
+                    y = int(centerY - (height / 2))
+
+                    # update our list of bounding box coordinates,
+                    # confidences, and class IDs
+                    # bounding box, 확률 및 클래스 ID 목록 추가
+                    boxes.append([x, y, int(width), int(height)])
+                    confidences.append(float(confidence))
+                    classIDs.append(classID)
+
+        # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+        # bounding box가 겹치는 것을 방지
+        idxs = cv2.dnn.NMSBoxes(
+            boxes, confidences, self.args.confidence, self.args.threshold
+        )
+        dets = []
+        if len(idxs) > 0:
+            # loop over the indexes we are keeping
+            for i in idxs.flatten():
+                (x, y) = (boxes[i][0], boxes[i][1])
+                (w, h) = (boxes[i][2], boxes[i][3])
+                dets.append([x, y, x + w, y + h, confidences[i]])
+
+        np.set_printoptions(formatter={"float": lambda x: "{0:0.3f}".format(x)})
+        dets = np.asarray(dets)
+        tracks = self.tracker.update(dets)
+
+        boxes = []
+        indexIDs = []
+        c = []
+        previous = self.memory.copy()
+        memory = {}
+
+        for track in tracks:
+            boxes.append([track[0], track[1], track[2], track[3]])
+            indexIDs.append(int(track[4]))
+            memory[indexIDs[-1]] = boxes[-1]
+
+        if len(boxes) > 0:
+            i = int(0)
+            for box in boxes:
+                # extract the bounding box coordinates
+                (x, y) = (int(box[0]), int(box[1]))
+                (w, h) = (int(box[2]), int(box[3]))
+                # x, y, w, h = boxes[i]
+
+                # draw a bounding box rectangle and label on the image
+                # color = [int(c) for c in COLORS[classIDs[i]]]
+                # cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+
+                color = [int(c) for c in self.COLORS[indexIDs[i] % len(self.COLORS)]]
+                cv2.rectangle(frame, (x, y), (w, h), color, 2)
+
+                if indexIDs[i] in previous:
+                    previous_box = previous[indexIDs[i]]
+                    (x2, y2) = (int(previous_box[0]), int(previous_box[1]))
+                    (w2, h2) = (int(previous_box[2]), int(previous_box[3]))
+                    p0 = (int(x + (w - x) / 2), int(y + (h - y) / 2))
+                    p1 = (int(x2 + (w2 - x2) / 2), int(y2 + (h2 - y2) / 2))
+                    cv2.line(frame, p0, p1, color, 3)
+
+                text = "{}{}".format(self.LABELS[classIDs[i]], indexIDs[i])
+
+                cv2.putText(
+                    frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+                )
+                i += 1
+        self.frame = frame
+
+        _, buffer = cv2.imencode(".jpg", frame)
+        frame = buffer.tobytes()
+
+        return frame

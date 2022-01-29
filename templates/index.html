@@ -17,12 +17,26 @@
         />
         <title>Live Streaming</title>
     </head>
+
     <body>
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 offset-lg-2">
                     <h3 class="mt-5">Smart CCTV Streaming</h3>
                     <img src="{{ url_for('video_feed') }}" width="100%" />
+                </div>
+                
+                <div class="col-lg-8 offset-lg-2">
+                    <h3 class="mt-5">Our Flask Buttons<h3/>
+                        <form method="post" action="/result">
+                        {% if rec == false %}
+                        <input type="submit" value="녹화시작" name="button">
+                        {% else %}
+                        <input type="submit" value="녹화종료" name="button">
+                        {% endif %}
+    
+                            <input type="submit" value="캡쳐" name="button"/>
+                        </form>
                 </div>
             </div>
         </div>
