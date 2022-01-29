@@ -66,14 +66,14 @@ def result():
                     f"videos/{str(now).replace(':','')}.avi",
                     fourcc,
                     120,
-                    (1280, 720),
+                    (yolo.frame.shape[1], yolo.frame.shape[0]),
                 )
                 thread = Thread(
                     target=record,
                     args=[out],
                 )
                 thread.start()
-                timer = time.time()
+                # timer = time.time()
                 # timed = str(datetime.timedelta(seconds=timer)).split(".")
             else:
                 out.release()
