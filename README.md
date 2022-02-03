@@ -1,6 +1,6 @@
 # Animal Detection using Raspberry Pi
 
-![](data/sample.png)
+![](data/sample.jpg)
 
 라즈베리 파이에서 동영상을 촬영하고, 이를 서버에서 받아 Object Detection을 하는 프로그램입니다.
 
