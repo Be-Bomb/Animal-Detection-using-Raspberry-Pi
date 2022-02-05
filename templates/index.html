@@ -25,30 +25,37 @@
                     <h3 class="mt-5">플라스크 버튼</h3>
                     <form method="post" action="/result">
                         {% if rec == false %}
-                        <input type="submit" value="녹화시작" name="button" />
+                        <input type="submit" value="녹화시작" name="button" onclick="record_start()" />
                         {% else %}
                         <input type="submit" value="녹화종료" name="button" />
                         <span id="clock" style="color: gray; font-size: 100px">clock</span>
                         {% endif %}
+
                         <input type="submit" value="캡쳐" name="button" />
+                        <input type="submit" value="예약녹화" name="button" />
                     </form>
                 </div>
             </div>
         </div>
 
         <script>
-            const Target = document.getElementById("clock");
-            const now_time = new Date();
-            const now_hours = now_time.getHours();
-            const now_minutes = now_time.getMinutes();
-            const now_seconds = now_time.getSeconds();
+            function record_start() {
+                const now_time = Date.now();
+                sessionStorage.setItem("now_time", now_time);
+            }
 
             function clock() {
+                const Target = document.getElementById("clock");
+                const record_start = parseInt(sessionStorage.getItem("now_time"));
+
                 const time = new Date();
-                const hours = time.getHours() - now_hours;
-                const minutes = time.getMinutes() - now_minutes;
-                const seconds = time.getSeconds() - now_seconds;
-                console.log(seconds - now_seconds);
+                const hours = parseInt((time - record_start) / 1000 / 60 / 60);
+                const minutes = parseInt((time - record_start) / 1000 / 60);
+                const seconds = parseInt((time - record_start) / 1000);
+
+                console.log("시간: ", time);
+                console.log("분: ", minutes);
+                console.log("초: ", seconds);
 
                 Target.innerText = `${hours > 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${
                     seconds < 10 ? `0${seconds}` : seconds
