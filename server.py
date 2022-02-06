@@ -2,9 +2,8 @@ import argparse
 import datetime
 import cv2
 from threading import Thread
-import time
 
-from flask import Flask, render_template, Response, request, redirect
+from flask import Flask, render_template, Response, request
 
 from yolo import *
 
@@ -27,13 +26,36 @@ from yolo import *
 
 app = Flask(__name__)
 
-out = None
+# video_output: output of video recording
+# rec: recording status
+video_output = None
 rec = False
 
 
-def record(out):
+def record(video_output):
+    iter = 0
     while rec:
-        out.write(yolo.frame)
+        if iter % 500 == 0:
+            print("녹화 중 ...")
+
+        video_output.write(yolo.frame)
+        iter += 1
+
+
+def reserve_record(video_output, start_time, end_time):
+    now = datetime.datetime.now()
+    iter = 0
+
+    while start_time <= now and now <= end_time:
+        if iter % 500 == 0:
+            print("예약녹화 중 ...")
+        video_output.write(yolo.frame)
+
+        now = datetime.datetime.now()
+        iter += 1
+
+    video_output.release()
+    print("예약녹화 완료")
 
 
 @app.route("/video_feed")
@@ -54,7 +76,7 @@ def index():
 # Video streaming home page.
 @app.route("/result", methods=["GET", "POST"])
 def result():
-    global rec, out
+    global rec, video_output
     now = datetime.datetime.now()
 
     if request.method == "POST":
@@ -62,7 +84,7 @@ def result():
             rec = not rec
             if rec:
                 fourcc = cv2.VideoWriter_fourcc(*"XVID")
-                out = cv2.VideoWriter(
+                video_output = cv2.VideoWriter(
                     f"videos/{str(now).replace(':','')}.avi",
                     fourcc,
                     120,
@@ -70,18 +92,37 @@ def result():
                 )
                 thread = Thread(
                     target=record,
-                    args=[out],
+                    args=[video_output],
                 )
                 thread.start()
-                # timer = time.time()
-                # timed = str(datetime.timedelta(seconds=timer)).split(".")
             else:
-                out.release()
+                video_output.release()
+                print("녹화 완료")
 
         elif request.form["button"] == "캡쳐":
             cv2.imwrite(f"images/{str(now).replace(':','')}.jpeg", yolo.frame)
+            print("캡쳐 완료")
 
-    # return render_template("index.html", rec=rec, timed=timed)
+        elif request.form["button"] == "예약녹화":
+            start_time = request.form["scheduler"][:19]
+            start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+
+            end_time = request.form["scheduler"][22:]
+            end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+
+            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            video_output = cv2.VideoWriter(
+                f"videos/{str(now).replace(':','')}.avi",
+                fourcc,
+                120,
+                (yolo.frame.shape[1], yolo.frame.shape[0]),
+            )
+            thread = Thread(
+                target=reserve_record,
+                args=[video_output, start_time, end_time],
+            )
+            thread.start()
+
     return render_template("index.html", rec=rec)
 
 

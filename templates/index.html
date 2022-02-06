@@ -11,46 +11,55 @@
             integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
             crossorigin="anonymous"
         />
+
+        <!-- Date Range Picker dependencies -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
         <title>Live Streaming</title>
     </head>
     <body>
         <div class="container">
             <div class="row">
-                <!-- 타이틀과 영상을 보여주는 곳 -->
+                <!-- Title & Video -->
                 <div class="col-lg-8 offset-lg-2">
                     <h3 class="mt-5">Smart CCTV Streaming</h3>
                     <img src="{{ url_for('video_feed') }}" width="100%" />
                 </div>
 
-                <!-- 버튼 액션 폼 -->
+                <!-- Button action form -->
                 <div class="col-lg-8 offset-lg-2">
                     <h3 class="mt-5">플라스크 버튼</h3>
                     <form method="post" action="/result">
-                        <!-- 녹화 시작 및 종료 -->
+                        <!-- record start & stop with timer -->
                         {% if rec == false %}
                         <input type="submit" value="녹화시작" name="button" onclick="record_start()" />
                         {% else %}
                         <input type="submit" value="녹화종료" name="button" />
-                        <span id="clock" style="color: gray"></span>
+                        <span id="clock" style="color: gray">0:00:00</span>
                         {% endif %}
-                        <!-- 사진 캡쳐 -->
+
+                        <!-- capture picture -->
                         <input type="submit" value="캡쳐" name="button" />
-                        <!-- 예약 녹화 -->
+
+                        <!-- recording scheduler -->
+                        <input type="text" id="scheduler" name="scheduler" value="예약녹화" />
                         <input type="submit" value="예약녹화" name="button" />
                     </form>
                 </div>
             </div>
         </div>
-
         <script>
-            // 녹화 시작 이벤트
+            // record start & set time in sessionStorage
             function record_start() {
                 const startTimeOfRecord = Date.now();
                 sessionStorage.setItem("startTimeOfRecord", startTimeOfRecord);
             }
 
-            // 녹화에 소요되는 시간 시각화
-            function clock() {
+            // show recording time when on-air per 1 minutes
+            setInterval(function () {
                 const Target = document.getElementById("clock");
                 const startTimeOfRecord = parseInt(sessionStorage.getItem("startTimeOfRecord"));
 
@@ -62,9 +71,33 @@
                 Target.innerText = `${hours > 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${
                     seconds < 10 ? `0${seconds}` : seconds
                 }`;
-            }
-            clock();
-            setInterval(clock, 1000); // 1초마다 실행
+            }, 1000);
+
+            // Date Range Picker
+            $(function () {
+                $("#scheduler").daterangepicker({
+                    locale: {
+                        format: "YYYY-MM-DD HH:mm:ss",
+                        separator: " ~ ",
+                        applyLabel: "확인",
+                        cancelLabel: "취소",
+                        fromLabel: "From",
+                        toLabel: "To",
+                        customRangeLabel: "Custom",
+                        weekLabel: "W",
+                        daysOfWeek: ["월", "화", "수", "목", "금", "토", "일"],
+                        monthNames: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+                        firstDay: 1,
+                    },
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    minDate: new Date(),
+                    drops: "up",
+                    timePicker: true,
+                    timePicker24Hour: true,
+                    timePickerSeconds: true,
+                });
+            });
         </script>
     </body>
 </html>
