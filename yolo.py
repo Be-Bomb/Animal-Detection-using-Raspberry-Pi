@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 import imagezmq
+import datetime
+import json
 
 from sort import *
 
@@ -26,6 +28,8 @@ class Yolo:
 
         self.tracker = Sort()
         self.memory = {}
+        self.object_frame_count = {}
+        self.object = {}
 
     # Video stream frame을 생성하고 웹으로 전송함
     def gen_frames(self):
@@ -52,6 +56,15 @@ class Yolo:
                 continue
 
             frame = self.detect(W, H, frame)
+
+            # object_frame_count의 최대값이 임계값을 넘을 경우 현재 프레임을 캡쳐하고 초기화
+            if max(self.object_frame_count.values()) > self.args.frame:
+                print(json.dumps(self.object, sort_keys=True, indent=4))
+                cv2.imwrite(
+                    f"images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
+                    self.frame,
+                )
+                self.object_frame_count = {}
 
             if self.args.input == "pi":  # 파이카메라 영상 송출 부분 (필수)
                 image_hub.send_reply(b"OK")
@@ -139,18 +152,33 @@ class Yolo:
 
         boxes = []
         indexIDs = []
-        c = []
-        previous = self.memory.copy()
-        memory = {}
+        # c = []
+        # previous = self.memory.copy()
+        self.memory = {}
 
         for track in tracks:
             boxes.append([track[0], track[1], track[2], track[3]])
             indexIDs.append(int(track[4]))
-            memory[indexIDs[-1]] = boxes[-1]
+            self.memory[indexIDs[-1]] = boxes[-1]
 
+        object_count = {}
         if len(boxes) > 0:
             i = int(0)
             for box in boxes:
+                text = "{}{}".format(self.LABELS[classIDs[i]], indexIDs[i])
+
+                # 탐지된 객체의 class counter
+                if self.LABELS[classIDs[i]] in object_count:
+                    object_count[self.LABELS[classIDs[i]]] += 1
+                else:
+                    object_count[self.LABELS[classIDs[i]]] = 1
+
+                # 탐지된 객체의 frame counter
+                if text in self.object_frame_count:
+                    self.object_frame_count[text] += 1
+                else:
+                    self.object_frame_count[text] = 1
+
                 # extract the bounding box coordinates
                 (x, y) = (int(box[0]), int(box[1]))
                 (w, h) = (int(box[2]), int(box[3]))
@@ -163,20 +191,35 @@ class Yolo:
                 color = [int(c) for c in self.COLORS[indexIDs[i] % len(self.COLORS)]]
                 cv2.rectangle(frame, (x, y), (w, h), color, 2)
 
-                if indexIDs[i] in previous:
-                    previous_box = previous[indexIDs[i]]
-                    (x2, y2) = (int(previous_box[0]), int(previous_box[1]))
-                    (w2, h2) = (int(previous_box[2]), int(previous_box[3]))
-                    p0 = (int(x + (w - x) / 2), int(y + (h - y) / 2))
-                    p1 = (int(x2 + (w2 - x2) / 2), int(y2 + (h2 - y2) / 2))
-                    cv2.line(frame, p0, p1, color, 3)
-
-                text = "{}{}".format(self.LABELS[classIDs[i]], indexIDs[i])
+                # 바운딩 박스 중앙의 선 출력
+                # if indexIDs[i] in previous:
+                #     previous_box = previous[indexIDs[i]]
+                #     (x2, y2) = (int(previous_box[0]), int(previous_box[1]))
+                #     (w2, h2) = (int(previous_box[2]), int(previous_box[3]))
+                #     p0 = (int(x + (w - x) / 2), int(y + (h - y) / 2))
+                #     p1 = (int(x2 + (w2 - x2) / 2), int(y2 + (h2 - y2) / 2))
+                # cv2.line(frame, p0, p1, color, 3)
 
                 cv2.putText(
                     frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
                 )
                 i += 1
+
+        # total count 출력
+        count_text = ""
+        for object in object_count:
+            count_text += f"{object}: {object_count[object]} "
+            self.object[object] = object_count[object]
+        cv2.putText(
+            frame,
+            count_text,
+            (50, 50),
+            cv2.FONT_HERSHEY_DUPLEX,
+            1.0,
+            (0, 255, 255),
+            2,
+        )
+
         self.frame = frame
 
         _, buffer = cv2.imencode(".jpg", frame)

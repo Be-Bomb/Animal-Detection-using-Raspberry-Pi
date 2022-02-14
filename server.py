@@ -146,6 +146,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--threshold", type=float, default=0.3, help="minimum threshold"
     )
+    parser.add_argument(
+        "--frame", type=int, default=50, help="threshold of frame count"
+    )
     args = parser.parse_args()
     yolo = Yolo(args)
 
