@@ -57,7 +57,8 @@ class Yolo:
 
             frame = self.detect(W, H, frame)
 
-            # object_frame_count의 최대값이 임계값을 넘을 경우 현재 프레임을 캡쳐하고 초기화
+            # object_frame_count의 최대값이 미리 설정된 임계값을 넘을 경우 현재 프레임을 캡쳐하고 초기화
+            # 그와 동시에 json 형식으로 출력한다. (희진 구현)
             if max(self.object_frame_count.values()) > self.args.frame:
                 print(json.dumps(self.object, sort_keys=True, indent=4))
                 cv2.imwrite(
