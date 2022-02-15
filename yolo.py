@@ -27,7 +27,7 @@ class Yolo:
         # self.ln = [self.ln[i - 1] for i in self.net.getUnconnectedOutLayers()]
 
         self.tracker = Sort()
-        self.memory = {}
+        # self.memory = {}
         self.object_frame_count = {}
         self.object = {}
 
@@ -155,12 +155,12 @@ class Yolo:
         indexIDs = []
         # c = []
         # previous = self.memory.copy()
-        self.memory = {}
+        # self.memory = {}
 
         for track in tracks:
             boxes.append([track[0], track[1], track[2], track[3]])
             indexIDs.append(int(track[4]))
-            self.memory[indexIDs[-1]] = boxes[-1]
+            # self.memory[indexIDs[-1]] = boxes[-1]
 
         object_count = {}
         if len(boxes) > 0:
