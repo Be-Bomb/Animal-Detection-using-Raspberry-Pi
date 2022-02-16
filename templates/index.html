@@ -4,6 +4,9 @@
         <!-- Required meta tags -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <link href="./style.css" rel="stylesheet" />
+
         <!-- Bootstrap CSS -->
         <link
             rel="stylesheet"
@@ -22,10 +25,29 @@
     </head>
     <body>
         <div class="container">
+            <h1 class="mt-5" style="color: lightskyblue">Smart CCTV Streaming</h1>
+            <hr />
+            <aside class="left_side">
+                <div class="menu">
+                    <nav>
+                        <ul>
+                            <li>
+                                <a href="https://www.naver.com/"> <em>submenu1</em> </a>
+                            </li>
+                            <li>
+                                <a href="https://www.google.co.kr/"> <em>submenu2</em> </a>
+                            </li>
+                            <li>
+                                <a href="https://www.daum.net/"> <em>submenu3</em> </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </aside>
+
             <div class="row">
                 <!-- Title & Video -->
                 <div class="col-lg-8 offset-lg-2">
-                    <h3 class="mt-5">Smart CCTV Streaming</h3>
                     <img src="{{ url_for('video_feed') }}" width="100%" />
                 </div>
 
@@ -51,6 +73,7 @@
                 </div>
             </div>
         </div>
+
         <script>
             // record start & set time in sessionStorage
             function record_start() {

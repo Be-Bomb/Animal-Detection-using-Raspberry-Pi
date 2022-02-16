@@ -3,6 +3,7 @@ import cv2
 import imagezmq
 import datetime
 import json
+from collections import OrderedDict
 
 from sort import *
 
@@ -29,7 +30,7 @@ class Yolo:
         self.tracker = Sort()
         # self.memory = {}
         self.object_frame_count = {}
-        self.object = {}
+        self.object_to_json = {}
 
     # Video stream frame을 생성하고 웹으로 전송함
     def gen_frames(self):
@@ -60,7 +61,7 @@ class Yolo:
             # object_frame_count의 최대값이 미리 설정된 임계값을 넘을 경우 현재 프레임을 캡쳐하고 초기화
             # 그와 동시에 json 형식으로 출력한다. (희진 구현)
             if max(self.object_frame_count.values()) > self.args.frame:
-                print(json.dumps(self.object, sort_keys=True, indent=4))
+                print(json.dumps(self.object_to_json, indent="\t"))
                 cv2.imwrite(
                     f"images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
                     self.frame,
@@ -208,9 +209,15 @@ class Yolo:
 
         # total count 출력
         count_text = ""
+        now = datetime.datetime.now().strftime("%Y%m%d")
+        self.object_to_json[now] = []
         for object in object_count:
             count_text += f"{object}: {object_count[object]} "
-            self.object[object] = object_count[object]
+
+            object_dict = OrderedDict()
+            object_dict["name"] = object
+            object_dict["count"] = object_count[object]
+            self.object_to_json[now].append(object_dict)
         cv2.putText(
             frame,
             count_text,
