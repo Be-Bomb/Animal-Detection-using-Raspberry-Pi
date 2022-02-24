@@ -38,7 +38,7 @@ class Yolo:
         if self.args.input == "pi":
             image_hub = imagezmq.ImageHub()
         elif self.args.input == "0":
-            vs = cv2.VideoCapture(0)
+            vs = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         else:
             vs = cv2.VideoCapture(self.args.input)
 
