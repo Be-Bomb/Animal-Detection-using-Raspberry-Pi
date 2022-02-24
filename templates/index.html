@@ -5,8 +5,6 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <link href="./style.css" rel="stylesheet" />
-
         <!-- Bootstrap CSS -->
         <link
             rel="stylesheet"
@@ -24,51 +22,59 @@
         <title>Live Streaming</title>
     </head>
     <body>
-        <div class="container">
-            <h1 class="mt-5" style="color: lightskyblue">Smart CCTV Streaming</h1>
-            <hr />
-            <aside class="left_side">
-                <div class="menu">
-                    <nav>
-                        <ul>
-                            <li>
-                                <a href="https://www.naver.com/"> <em>submenu1</em> </a>
-                            </li>
-                            <li>
-                                <a href="https://www.google.co.kr/"> <em>submenu2</em> </a>
-                            </li>
-                            <li>
-                                <a href="https://www.daum.net/"> <em>submenu3</em> </a>
-                            </li>
-                        </ul>
-                    </nav>
+        <div class="footer">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand mb-0 h1" style="color: lightskyblue">Smart CCTV Streaming</a>
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-link active" href="#">submenu 1</a>
+                        <a class="nav-link" href="#">submenu 2</a>
+                        <a class="nav-link" href="#">submenu 3</a>
+                    </div>
                 </div>
-            </aside>
+            </nav>
+        </div>
 
+        <div class="container mt-3">
             <div class="row">
                 <!-- Title & Video -->
-                <div class="col-lg-8 offset-lg-2">
+                <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
                     <img src="{{ url_for('video_feed') }}" width="100%" />
-                </div>
 
-                <!-- Button action form -->
-                <div class="col-lg-8 offset-lg-2">
+                    <!-- Button action form -->
                     <h3 class="mt-5">플라스크 버튼</h3>
                     <form method="post" action="/result">
                         <!-- record start & stop with timer -->
                         {% if rec == false %}
-                        <input type="submit" value="녹화시작" name="button" onclick="record_start()" />
+                        <p>
+                            <input type="submit" value="녹화시작" name="button" class="btn btn-outline-primary" onclick="record_start()" />
+                        </p>
                         {% else %}
-                        <input type="submit" value="녹화종료" name="button" />
-                        <span id="clock" style="color: gray">0:00:00</span>
+                        <p>
+                            <input type="submit" value="녹화종료" class="btn btn-outline-primary" name="button" />
+                            <span id="clock" style="color: gray">0:00:00</span>
+                        </p>
                         {% endif %}
 
                         <!-- capture picture -->
-                        <input type="submit" value="캡쳐" name="button" />
+                        <p><input type="submit" value="캡쳐" class="btn btn-outline-primary" name="button" /></p>
 
                         <!-- recording scheduler -->
-                        <input type="text" id="scheduler" name="scheduler" value="예약녹화" />
-                        <input type="submit" value="예약녹화" name="button" />
+                        <p>
+                            <input type="text" id="scheduler" class="btn btn-outline-primary" name="scheduler" value="예약녹화" />
+                            <input type="submit" value="예약녹화" class="btn btn-outline-primary" name="button" />
+                        </p>
                     </form>
                 </div>
             </div>
