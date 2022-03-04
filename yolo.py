@@ -64,9 +64,8 @@ class Yolo:
             yield (b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
 
             # object_frame_count의 최대값이 미리 설정된 임계값을 넘을 경우 현재 프레임을 캡쳐하고 초기화
-            # 그와 동시에 json 형식으로 출력한다. (희진 구현)
-            # max(none) 일때 오류 발생 / 체크하는 if문 추가 (재현 수정)
-            if (max(self.object_frame_count.values())):
+            # 그와 동시에 json 형식으로 출력한다. 추후 구현 예정
+            if self.object_frame_count.values():
                 if max(self.object_frame_count.values()) > self.args.frame:
                     print(json.dumps(self.object_to_json, indent="\t"))
                     cv2.imwrite(
