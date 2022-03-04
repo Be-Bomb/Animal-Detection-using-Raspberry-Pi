@@ -76,6 +76,7 @@
                             <input type="submit" value="예약녹화" class="btn btn-outline-primary" name="button" />
                         </p>
                     </form>
+                    <span id="time" style="color: gray">0:00:00</span>
                 </div>
             </div>
         </div>
@@ -89,10 +90,13 @@
 
             // show recording time when on-air per 1 minutes
             setInterval(function () {
+                const Time = document.getElementById("time");
+                const recordingTime = new Date();
+                Time.innerText = recordingTime.toLocaleString();
+
                 const Target = document.getElementById("clock");
                 const startTimeOfRecord = parseInt(sessionStorage.getItem("startTimeOfRecord"));
 
-                const recordingTime = new Date();
                 const hours = parseInt((recordingTime - startTimeOfRecord) / 1000 / 60 / 60);
                 const minutes = parseInt((recordingTime - startTimeOfRecord) / 1000 / 60);
                 const seconds = parseInt((recordingTime - startTimeOfRecord) / 1000);
