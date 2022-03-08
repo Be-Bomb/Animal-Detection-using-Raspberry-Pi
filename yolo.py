@@ -67,7 +67,11 @@ class Yolo:
             # 그와 동시에 json 형식으로 출력한다. 추후 구현 예정
             if self.object_frame_count.values():
                 if max(self.object_frame_count.values()) > self.args.frame:
-                    print(json.dumps(self.object_to_json, indent="\t"))
+                    self.json = json.dumps(self.object_to_json, indent="\t")
+                    print(self.json)
+                    # with open("text.json", "w", encoding="utf-8") as make_file:
+                    #     json.dump(self.object_to_json, make_file, indent="\t")
+
                     cv2.imwrite(
                         f"images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
                         self.frame,

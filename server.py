@@ -3,7 +3,7 @@ import datetime
 import cv2
 from threading import Thread
 
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, json
 
 from yolo import *
 
@@ -124,6 +124,11 @@ def result():
             thread.start()
 
     return render_template("index.html", rec=rec)
+
+
+@app.route("/data_chart", methods=["GET"])
+def data_chart():
+    return yolo.json if hasattr(yolo, "json") else "Data Chart"
 
 
 if __name__ == "__main__":

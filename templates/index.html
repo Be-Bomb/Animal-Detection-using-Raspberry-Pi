@@ -76,7 +76,9 @@
                             <input type="submit" value="예약녹화" class="btn btn-outline-primary" name="button" />
                         </p>
                     </form>
-                    <span id="time" style="color: gray">0:00:00</span>
+                    <div id="time" style="color: gray">0:00:00</div>
+
+                    <div id="text">Data Chart</div>
                 </div>
             </div>
         </div>
@@ -105,6 +107,19 @@
                     seconds < 10 ? `0${seconds}` : seconds
                 }`;
             }, 1000);
+
+            $(document).ready(function () {
+                setInterval(function () {
+                    $.ajax({
+                        type: "get",
+                        url: "{{  url_for('data_chart')  }}",
+                        dataType: "json",
+                        success: function (result) {
+                            $("#text").html(JSON.stringify(result, null, 4));
+                        },
+                    });
+                }, 3000);
+            });
 
             // Date Range Picker
             $(function () {
