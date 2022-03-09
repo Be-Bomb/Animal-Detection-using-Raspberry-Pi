@@ -1,27 +1,15 @@
 import argparse
 import datetime
+from datetime import datetime
 import cv2
 from threading import Thread
 
 from flask import Flask, render_template, Response, request
+import json
 
+# local
 from yolo import *
-
-
-# import pyrebase
-# import json
-
-
-# with open("auth.json") as f:
-#     config = json.load(f)
-
-# firebase = pyrebase.initialize_app(config)
-# db = firebase.database()
-
-# password는 암호화해서 넣어야 함.
-# 일단 여기서는 했다고 가정.
-# signin = {"password": 1234, "username":"heejin"}
-# db.child("users").child("kook").set(signin)
+import firebase_work as fb
 
 
 app = Flask(__name__)
@@ -30,6 +18,18 @@ app = Flask(__name__)
 # rec: recording status
 video_output = None
 rec = False
+
+
+
+# APP Token 받은 후 app-token.json 파일 생성
+@app.route("/get_token", methods=['POST'])
+def get_token():
+    if request.method == 'POST':
+        request_data = json.loads(request.data.decode('utf-8'))
+        with open('app-token.json', 'w') as file:
+            json.dump(request_data, file)
+    return ""
+
 
 
 def record(video_output):
@@ -98,10 +98,14 @@ def result():
             else:
                 video_output.release()
                 print("녹화 완료")
+            # storage에 저장
+            # fb.storagePush("video", video_name)
 
         elif request.form["button"] == "캡쳐":
             cv2.imwrite(f"images/{str(now).replace(':','')}.jpeg", yolo.frame)
             print("캡쳐 완료")
+            # storage에 저장
+            # fb.storagePush("photo", img_name)
 
         elif request.form["button"] == "예약녹화":
             start_time = request.form["scheduler"][:19]
