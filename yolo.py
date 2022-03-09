@@ -7,6 +7,11 @@ from collections import OrderedDict
 
 from sort import *
 
+with open('app-token.json', 'r') as file:
+    token_data = json.load(file)
+
+tokens = [token_data['token']]
+
 
 class Yolo:
     def __init__(self, args):
@@ -72,6 +77,7 @@ class Yolo:
                         f"images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
                         self.frame,
                     )
+                    fcm.sendPush("Notification", str(self.object_to_json), tokens)
                     self.object_frame_count = {}
 
     def detect(self, H, W, frame):
