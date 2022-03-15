@@ -1,11 +1,11 @@
 import numpy as np
 import cv2
-import imagezmq
 import datetime
 import json
 from collections import OrderedDict
 
-from sort import *
+from utils import sort
+from utils import imagezmq
 
 
 class Yolo:
@@ -27,10 +27,11 @@ class Yolo:
         self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
         # self.ln = [self.ln[i - 1] for i in self.net.getUnconnectedOutLayers()]
 
-        self.tracker = Sort()
+        self.tracker = sort.Sort()
         # self.memory = {}
         self.object_frame_count = {}
         self.object_to_json = {}
+        self.detected_object_list = []
 
     # Video stream frame을 생성하고 웹으로 전송함
     def gen_frames(self):
@@ -68,7 +69,8 @@ class Yolo:
             if self.object_frame_count.values():
                 if max(self.object_frame_count.values()) > self.args.frame:
                     self.json = json.dumps(self.object_to_json, indent="\t")
-                    print(self.json)
+                    # print(self.json)
+                    print(self.detected_object_list)
                     # with open("text.json", "w", encoding="utf-8") as make_file:
                     #     json.dump(self.object_to_json, make_file, indent="\t")
 
@@ -186,6 +188,9 @@ class Yolo:
                 else:
                     self.object_frame_count[text] = 1
 
+                if text not in self.detected_object_list:
+                    self.detected_object_list.append(text)
+
                 # extract the bounding box coordinates
                 (x, y) = (int(box[0]), int(box[1]))
                 (w, h) = (int(box[2]), int(box[3]))
@@ -223,6 +228,7 @@ class Yolo:
             object_dict["name"] = object
             object_dict["count"] = object_count[object]
             self.object_to_json[now].append(object_dict)
+
         cv2.putText(
             frame,
             count_text,
