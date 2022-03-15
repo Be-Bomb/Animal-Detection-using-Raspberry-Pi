@@ -4,8 +4,7 @@ import datetime
 import json
 from collections import OrderedDict
 
-from utils import sort
-from utils import imagezmq
+from utils import sort, imagezmq
 
 
 class Yolo:
@@ -70,7 +69,6 @@ class Yolo:
                 if max(self.object_frame_count.values()) > self.args.frame:
                     self.json = json.dumps(self.object_to_json, indent="\t")
                     # print(self.json)
-                    print(self.detected_object_list)
                     # with open("text.json", "w", encoding="utf-8") as make_file:
                     #     json.dump(self.object_to_json, make_file, indent="\t")
 
@@ -190,6 +188,7 @@ class Yolo:
 
                 if text not in self.detected_object_list:
                     self.detected_object_list.append(text)
+                    print(f"{text} has been detected...")
 
                 # extract the bounding box coordinates
                 (x, y) = (int(box[0]), int(box[1]))
