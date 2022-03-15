@@ -1,7 +1,7 @@
 import datetime
 import cv2
 
-from utils.opts import parse_opt
+from utils import opts, remove_outdated_files
 from yolo import Yolo
 
 from threading import Thread
@@ -132,7 +132,8 @@ def data_chart():
 
 
 if __name__ == "__main__":
-    opt = parse_opt()
+    remove_outdated_files.remove_file()
+    opt = opts.parse_opt()
     yolo = Yolo(opt)
 
     app.run(host="localhost", debug=True, port=3000)
