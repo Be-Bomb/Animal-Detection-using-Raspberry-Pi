@@ -108,11 +108,17 @@
                     <div id="presentTime" style="color: gray">0:00:00</div>
 
                     <!-- 데이터 차트 시각화 정보를 가져옵니다. -->
-                    <div id="text">Data Chart</div>
+                    <div id="dataChart">Data Chart</div>
 
                     <!-- 모달 이미지를 가져옵니다. -->
                     <div class="modal">
-                        <div class="modal_content">이곳에서 이미지를 보여줄 예정</div>
+                        <div class="modal_content">
+                            {% if not session["imageName"] %}
+                            <div>아직 데이터가 없습니다.</div>
+                            {% else %} {% for image in session["imageName"] %}
+                            <img src="{{ url_for('static', filename=image|string) }}" width="100%" />
+                            {% endfor %}{% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

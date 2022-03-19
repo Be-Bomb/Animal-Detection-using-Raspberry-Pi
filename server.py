@@ -1,11 +1,14 @@
 import datetime
 import cv2
 
-from utils import opts, remove_outdated_files
+from utils import opts, handling_file
 from yolo import Yolo
 
 from threading import Thread
-from flask import Flask, render_template, Response, request, json
+from flask import Flask, render_template, Response, request, json, session
+
+import glob
+import os
 
 
 # import pyrebase
@@ -25,6 +28,8 @@ from flask import Flask, render_template, Response, request, json
 
 
 app = Flask(__name__)
+app.secret_key = '_5#y2L"F4Q8z\n\xec]/'
+
 
 # video_output: output of video recording
 # rec: recording status
@@ -85,7 +90,7 @@ def result():
             if rec:
                 fourcc = cv2.VideoWriter_fourcc(*"XVID")
                 video_output = cv2.VideoWriter(
-                    f"videos/{str(now).replace(':','')}.avi",
+                    f"static/videos/{str(now).replace(':','')}.avi",
                     fourcc,
                     120,
                     (yolo.frame.shape[1], yolo.frame.shape[0]),
@@ -100,7 +105,7 @@ def result():
                 print("녹화 완료")
 
         elif request.form["button"] == "캡쳐":
-            cv2.imwrite(f"images/{str(now).replace(':','')}.jpeg", yolo.frame)
+            cv2.imwrite(f"static/images/{str(now).replace(':','')}.jpeg", yolo.frame)
             print("캡쳐 완료")
 
         elif request.form["button"] == "예약녹화":
@@ -112,7 +117,7 @@ def result():
 
             fourcc = cv2.VideoWriter_fourcc(*"XVID")
             video_output = cv2.VideoWriter(
-                f"videos/{str(now).replace(':','')}.avi",
+                f"static/videos/{str(now).replace(':','')}.avi",
                 fourcc,
                 120,
                 (yolo.frame.shape[1], yolo.frame.shape[0]),
@@ -126,13 +131,23 @@ def result():
     return render_template("index.html", rec=rec)
 
 
-@app.route("/data_chart", methods=["GET"])
+@app.route("/data_chart")
 def data_chart():
     return yolo.json if hasattr(yolo, "json") else "Data Chart"
 
 
+@app.route("/get_images")
+def get_images():
+    session.clear()
+
+    file_list = handling_file.get_detected_images()
+    if file_list:
+        session["imageName"] = file_list
+    return "get images"
+
+
 if __name__ == "__main__":
-    remove_outdated_files.remove_file()
+    handling_file.remove_outdated_files()
     opt = opts.parse_opt()
     yolo = Yolo(opt)
 
