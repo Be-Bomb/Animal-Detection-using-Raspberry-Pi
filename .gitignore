@@ -286,7 +286,7 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,macos,windows,flask
 
-images/*
-!images/.gitkeep
-videos/*
-!videos/.gitkeep
+static/images/*
+!static/images/.gitkeep
+static/videos/*
+!static/videos/.gitkeep
