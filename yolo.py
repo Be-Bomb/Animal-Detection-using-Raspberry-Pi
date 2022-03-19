@@ -186,9 +186,13 @@ class Yolo:
                 else:
                     self.object_frame_count[text] = 1
 
+                # 객체가 처음 탐지되었을 때 출력하는 코드.
                 if text not in self.detected_object_list:
                     self.detected_object_list.append(text)
                     print(f"{text} has been detected...")
+
+                # 매 객체를 출력하는 코드. 주석 해제할 경우 너무 많이 출력이 된다.
+                # print(f"{self.detected_object_list} has been detecting...")
 
                 # extract the bounding box coordinates
                 (x, y) = (int(box[0]), int(box[1]))
