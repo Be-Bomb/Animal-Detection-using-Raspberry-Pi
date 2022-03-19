@@ -73,7 +73,7 @@ class Yolo:
                     #     json.dump(self.object_to_json, make_file, indent="\t")
 
                     cv2.imwrite(
-                        f"images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
+                        f"static/images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
                         self.frame,
                     )
                     self.object_frame_count = {}
