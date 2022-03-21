@@ -7,8 +7,8 @@ def remove_outdated_files():
     today_date = datetime.date.today()
     remove_date = today_date - datetime.timedelta(days=2)
 
-    images_path = os.path.join(os.getcwd(), "static/images/*.jpeg")
-    videos_path = os.path.join(os.getcwd(), "static/videos/*.avi")
+    images_path = os.path.join(os.getcwd(), "static", "images", "*.jpeg")
+    videos_path = os.path.join(os.getcwd(), "static", "videos", "*.avi")
 
     images = glob.glob(images_path)
     videos = glob.glob(videos_path)
@@ -29,14 +29,14 @@ def remove_outdated_files():
 
 
 def get_detected_images():
-    images_path = os.path.join(os.getcwd(), "static/images/*.jpeg")
+    images_path = os.path.join(os.getcwd(), "static", "images", "*.jpeg")
     images = glob.glob(images_path)
     images = sorted(images)
 
     file_list = []
     for image in images:
-        file_name_splited = image.split("/")
-        dir, file_name = file_name_splited[-2], file_name_splited[-1]
-        file_list.append(os.path.join(dir, file_name))
+        file_name_splited = os.path.split(image)
+        directory, file_name = file_name_splited[-2], file_name_splited[-1]
+        file_list.append("images/" + file_name)
 
     return file_list
