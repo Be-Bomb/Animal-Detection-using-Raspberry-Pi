@@ -5,10 +5,7 @@ from utils import opts, handling_file
 from yolo import Yolo
 
 from threading import Thread
-from flask import Flask, render_template, Response, request, json, session
-
-import glob
-import os
+from flask import Flask, render_template, Response, request, session
 
 
 # import pyrebase
@@ -28,7 +25,7 @@ import os
 
 
 app = Flask(__name__)
-app.secret_key = '_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = "인천대학교 컴퓨터공학과 캡스톤디자인 Be Bomb"
 
 
 # video_output: output of video recording
@@ -140,6 +137,7 @@ def data_chart():
 def get_images():
     session.clear()
 
+    handling_file.remove_outdated_files()
     file_list = handling_file.get_detected_images()
     if file_list:
         session["imageName"] = file_list
