@@ -72,10 +72,10 @@ class Yolo:
                     # with open("text.json", "w", encoding="utf-8") as make_file:
                     #     json.dump(self.object_to_json, make_file, indent="\t")
 
-                    cv2.imwrite(
-                        f"static/images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
-                        self.frame,
-                    )
+                    # cv2.imwrite(
+                    #     f"static/images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
+                    #     self.frame,
+                    # )
                     self.object_frame_count = {}
 
     def detect(self, H, W, frame):
@@ -149,9 +149,9 @@ class Yolo:
         if len(idxs) > 0:
             # loop over the indexes we are keeping
             for i in idxs.flatten():
-                if boxes[i][0] == boxes[i][2]:
+                if not boxes[i][2]:
                     continue
-                if boxes[i][1] != boxes[i][3]:
+                if not boxes[i][3]:
                     continue
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
@@ -193,7 +193,7 @@ class Yolo:
                 # 객체가 처음 탐지되었을 때 출력하는 코드.
                 if text not in self.detected_object_list:
                     self.detected_object_list.append(text)
-                    print(f"{text} has been detected...")
+                    # print(f"{text} has been detected...")
 
                 # 매 객체를 출력하는 코드. 주석 해제할 경우 너무 많이 출력이 된다.
                 # print(f"{self.detected_object_list} has been detecting...")
