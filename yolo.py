@@ -149,6 +149,10 @@ class Yolo:
         if len(idxs) > 0:
             # loop over the indexes we are keeping
             for i in idxs.flatten():
+                if boxes[i][0] == boxes[i][2]:
+                    continue
+                if boxes[i][1] != boxes[i][3]:
+                    continue
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
                 dets.append([x, y, x + w, y + h, confidences[i]])
