@@ -17,6 +17,7 @@ $(function () {
         startDate: new Date(),
         endDate: new Date(),
         minDate: new Date(),
+        maxSpan: {days: 7},
         drops: "up",
         timePicker: true,
         timePicker24Hour: true,
