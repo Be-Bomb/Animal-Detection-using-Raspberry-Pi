@@ -29,37 +29,37 @@ $(function () {
             },
         });
     }, 1000);
-});
 
-// 녹화 시작 버튼
-$("#recordStart").click(function () {
-    const startTimeOfRecord = Date.now();
-    localStorage.setItem("startTimeOfRecord", startTimeOfRecord);
-});
-
-// 녹화 종료 버튼
-$("#recordStop").click(function () {
-    localStorage.removeItem(startTimeOfRecord);
-});
-
-// 모달 창 열기
-$("#storageButton").click(function () {
-    $(".modal").fadeIn();
-
-    $.ajax({
-        type: "get",
-        url: "/get_images",
-        success: function () {
-            // 모달 창을 새로고침하여 데이터를 가져온다.
-            $(".modal_content").load(window.location.href + " .modal_content");
-        },
-        error: function () {
-            console.log("get images fail");
-        },
+    // 녹화 시작 버튼
+    $("#recordStart").click(function () {
+        const startTimeOfRecord = Date.now();
+        localStorage.setItem("startTimeOfRecord", startTimeOfRecord);
     });
-});
 
-// 모달 창 닫기
-$(".modal").click(function () {
-    $(".modal").fadeOut();
+    // 녹화 종료 버튼
+    $("#recordStop").click(function () {
+        localStorage.clear();
+    });
+
+    // 모달 창 열기
+    $("#storageButton").click(function () {
+        $(".modal").fadeIn();
+
+        $.ajax({
+            type: "get",
+            url: "/get_images",
+            success: function () {
+                // 모달 창을 새로고침하여 데이터를 가져온다.
+                $(".modal_content").load(window.location.href + " .modal_content");
+            },
+            error: function () {
+                console.log("get images fail");
+            },
+        });
+    });
+
+    // 모달 창 닫기
+    $(".modal").click(function () {
+        $(".modal").fadeOut();
+    });
 });
