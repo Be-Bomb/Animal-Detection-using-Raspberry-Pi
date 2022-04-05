@@ -142,32 +142,32 @@ class Yolo:
 
         # apply non-maxima suppression to suppress weak, overlapping bounding boxes
         # bounding box가 겹치는 것을 방지
-        idxs = cv2.dnn.NMSBoxes(
-            boxes, confidences, self.args.confidence, self.args.threshold
-        )
-        dets = []
-        if len(idxs) > 0:
-            # loop over the indexes we are keeping
-            for i in idxs.flatten():
-                (x, y) = (boxes[i][0], boxes[i][1])
-                (w, h) = (boxes[i][2], boxes[i][3])
-                if x == x + w:
-                    continue
-                if y == y + h:
-                    continue
-                dets.append([x, y, x + w, y + h, confidences[i]])
-
-        np.set_printoptions(formatter={"float": lambda x: "{0:0.3f}".format(x)})
-        dets = np.asarray(dets)
-        tracks = self.tracker.update(dets)
-
-        boxes = []
-        indexIDs = []
-        # c = []
-        # previous = self.memory.copy()
-        # self.memory = {}
-
         try:
+            idxs = cv2.dnn.NMSBoxes(
+                boxes, confidences, self.args.confidence, self.args.threshold
+            )
+            dets = []
+            if len(idxs) > 0:
+                # loop over the indexes we are keeping
+                for i in idxs.flatten():
+                    (x, y) = (boxes[i][0], boxes[i][1])
+                    (w, h) = (boxes[i][2], boxes[i][3])
+                    if x == x + w:
+                        continue
+                    if y == y + h:
+                        continue
+                    dets.append([x, y, x + w, y + h, confidences[i]])
+
+            np.set_printoptions(formatter={"float": lambda x: "{0:0.3f}".format(x)})
+            dets = np.asarray(dets)
+            tracks = self.tracker.update(dets)
+
+            boxes = []
+            indexIDs = []
+            # c = []
+            # previous = self.memory.copy()
+            # self.memory = {}
+
             for track in tracks:
                 boxes.append([track[0], track[1], track[2], track[3]])
                 indexIDs.append(int(track[4]))
