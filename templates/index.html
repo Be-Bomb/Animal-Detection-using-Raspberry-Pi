@@ -67,7 +67,7 @@
             </div>
 
             <!-- 녹화 버튼 -->
-            <form class="row mb-1" method="post" action="/result">
+            <form class="row mb-1" method="post" id="recordForm" action="result">
                 {% if rec == false %}
                 <div class="col">
                     <input type="submit" value="녹화시작" class="btn btn-primary form-control" name="button" id="recordStart" />
@@ -83,19 +83,19 @@
             </form>
 
             <!-- 캡쳐 버튼 -->
-            <form class="row mb-1" method="post" action="/result">
+            <form class="row mb-1" method="post" id="captureForm">
                 <div class="col">
                     <input type="submit" value="캡쳐" class="btn btn-primary form-control" name="button" id="capture" />
                 </div>
             </form>
 
             <!-- 예약 녹화 시간 설정 버튼 -->
-            <form class="row" method="post" action="/result">
+            <form class="row" method="post" id="reserveForm">
                 <div class="col-sm-6">
-                    <input type="text" id="scheduler" class="btn btn-primary form-control" name="scheduler" value="예약녹화" />
+                    <input type="text" value="예약녹화" class="btn btn-primary form-control" name="scheduler" id="scheduler" />
                 </div>
                 <div class="col-sm-6">
-                    <input type="submit" value="예약녹화" class="btn btn-primary form-control" name="button" />
+                    <input type="submit" value="예약녹화" class="btn btn-primary form-control" name="button" id="reserveRecord" />
                 </div>
             </form>
 
@@ -129,7 +129,7 @@
                         <div class="container-fluid">
                             <div class="row row-cols-3">
                                 {% for image in session["imageName"] %}
-                                <img src="{{ url_for('static', filename=image|string) }}" class="img-fluid col" />
+                                <img src="{{ url_for('static', filename=image|string) }}" class="img-fluid mb-3" />
                                 {% endfor %}
                             </div>
                         </div>

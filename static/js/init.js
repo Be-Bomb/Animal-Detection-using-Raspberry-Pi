@@ -27,7 +27,7 @@ $(function () {
                     $("#dataChart").html(JSON.stringify(result, null, 4));
                 },
                 error: function () {
-                    console.log("data chart fail");
+                    console.log("데이터 차트 가져오기 실패");
                 },
             });
             return init;
@@ -56,7 +56,44 @@ $(function () {
                 $("#modal").load(window.location.href + " #modal");
             },
             error: function () {
-                console.log("get images fail");
+                console.log("모달 이미지 가져오기 실패");
+            },
+        });
+    });
+
+    // 사진 캡쳐
+    $(document).on("submit", "#captureForm", function (e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/result",
+            data: {
+                button: $("#capture").val(),
+            },
+            success: function () {
+                console.log("사진 캡쳐 성공");
+            },
+            error: function () {
+                console.log("사진 캡쳐 실패");
+            },
+        });
+    });
+
+    // 예약 녹화
+    $(document).on("submit", "#reserveForm", function (e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/result",
+            data: {
+                button: $("#reserveRecord").val(),
+                scheduler: $("#scheduler").val(),
+            },
+            success: function () {
+                console.log("예약 녹화 성공");
+            },
+            error: function () {
+                console.log("예약 녹화 실패");
             },
         });
     });

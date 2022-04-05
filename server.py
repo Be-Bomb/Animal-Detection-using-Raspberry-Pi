@@ -82,7 +82,10 @@ def result():
     now = datetime.datetime.now()
 
     if request.method == "POST":
-        if request.form["button"][:2] == "녹화":
+        form_button = request.form.get("button", None)
+        form_scheduler = request.form.get("scheduler", None)
+
+        if form_button[:2] == "녹화":
             rec = not rec
             if rec:
                 fourcc = cv2.VideoWriter_fourcc(*"XVID")
@@ -101,15 +104,15 @@ def result():
                 video_output.release()
                 print("녹화 완료")
 
-        elif request.form["button"] == "캡쳐":
+        elif form_button == "캡쳐":
             cv2.imwrite(f"static/images/{str(now).replace(':','')}.jpeg", yolo.frame)
             print("캡쳐 완료")
 
-        elif request.form["button"] == "예약녹화":
-            start_time = request.form["scheduler"][:19]
+        elif form_button == "예약녹화":
+            start_time = form_scheduler[:19]
             start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
 
-            end_time = request.form["scheduler"][22:]
+            end_time = form_scheduler[22:]
             end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
 
             fourcc = cv2.VideoWriter_fourcc(*"XVID")
@@ -138,9 +141,9 @@ def get_images():
     session.clear()
 
     handling_file.remove_outdated_files()
-    file_list = handling_file.get_detected_images()
-    if file_list:
-        session["imageName"] = file_list
+    image_list = handling_file.get_detected_images()
+    if image_list:
+        session["imageName"] = image_list
     return "get images"
 
 
