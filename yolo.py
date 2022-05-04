@@ -1,18 +1,13 @@
 import numpy as np
 import cv2
-import imagezmq
-import datetime
+from datetime import datetime
 import json
-from collections import OrderedDict
+import re
+from module import firebase_work as fw
 
-from sort import *
-import FCMManager as fcm
-
-
-with open('app-token.json', 'r') as file:
-    token_data = json.load(file)
-
-tokens = [token_data['token']]
+from utils import sort, imagezmq
+from module import FCMManager as fcm
+from module import dbModule as dbm
 
 
 class Yolo:
@@ -23,6 +18,10 @@ class Yolo:
         with open(self.args.label, "r") as f:
             self.LABELS = [line.strip() for line in f.readlines()]
 
+        with open('./config/app-token.json', 'r') as file:
+            get_token = json.load(file)
+        self.token = [get_token['token']]
+
         # 객체를 표시할 bounding box와 text의 랜덤 색상
         self.COLORS = np.random.randint(0, 255, size=(200, 3), dtype="uint8")
 
@@ -31,15 +30,25 @@ class Yolo:
 
         # YOLO에서 필요한 output 레이어 이름
         self.ln = self.net.getLayerNames()
-        self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
+        self.ln = [self.ln[i[0] - 1]
+                   for i in self.net.getUnconnectedOutLayers()]
         # self.ln = [self.ln[i - 1] for i in self.net.getUnconnectedOutLayers()]
 
-        self.tracker = Sort()
+        self.tracker = sort.Sort()
+        self.dbmodule = dbm.Database()
         # self.memory = {}
+        self.object_dict = {
+            'water_deer': '고라니',
+            'wild_pig': '멧돼지',
+            'cat': '고양이',
+            'person': '사람'
+        }
         self.object_frame_count = {}
         self.object_to_json = {}
+        self.detected_object_list = []
 
     # Video stream frame을 생성하고 웹으로 전송함
+
     def gen_frames(self):
         # 영상선택 pi / 웹캠 / 동영상
         if self.args.input == "pi":
@@ -74,12 +83,22 @@ class Yolo:
             # 그와 동시에 json 형식으로 출력한다. 추후 구현 예정
             if self.object_frame_count.values():
                 if max(self.object_frame_count.values()) > self.args.frame:
-                    print(json.dumps(self.object_to_json, indent="\t"))
-                    cv2.imwrite(
-                        f"images/{str(datetime.datetime.now()).replace(':','')}.jpeg",
-                        self.frame,
-                    )
-                    fcm.sendPush("Notification", str(self.object_to_json), tokens)
+                    # self.json = json.dumps(self.object_to_json, indent="\t")
+                    # print(self.json)
+                    # with open("text.json", "w", encoding="utf-8") as make_file:
+                    #     json.dump(self.object_to_json, make_file, indent="\t")
+
+                    # cv2.imwrite(
+                    #     f"static/images/{datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S').replace(':','')}.jpeg",
+                    #     self.frame,
+                    # )
+                    # self.dbmodule.insertInfo(self.object_to_json[datetime.datetime.now().strftime("%Y%m%d")][0]["name"])
+                    # print(self.object_to_json)
+                    object_name = re.sub(
+                        r'[0-9]+', '', max(self.object_frame_count.keys()))
+
+                    if fw.pushIntensity() == 2:
+                        fcm.sendPush(self.object_dict[object_name], self.token)
                     self.object_frame_count = {}
 
     def detect(self, H, W, frame):
@@ -155,9 +174,14 @@ class Yolo:
             for i in idxs.flatten():
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
+                if x == x + w:
+                    continue
+                if y == y + h:
+                    continue
                 dets.append([x, y, x + w, y + h, confidences[i]])
 
-        np.set_printoptions(formatter={"float": lambda x: "{0:0.3f}".format(x)})
+        np.set_printoptions(
+            formatter={"float": lambda x: "{0:0.3f}".format(x)})
         dets = np.asarray(dets)
         tracks = self.tracker.update(dets)
 
@@ -167,10 +191,13 @@ class Yolo:
         # previous = self.memory.copy()
         # self.memory = {}
 
-        for track in tracks:
-            boxes.append([track[0], track[1], track[2], track[3]])
-            indexIDs.append(int(track[4]))
-            # self.memory[indexIDs[-1]] = boxes[-1]
+        try:
+            for track in tracks:
+                boxes.append([track[0], track[1], track[2], track[3]])
+                indexIDs.append(int(track[4]))
+                # self.memory[indexIDs[-1]] = boxes[-1]
+        except:
+            pass
 
         object_count = {}
         if len(boxes) > 0:
@@ -190,6 +217,25 @@ class Yolo:
                 else:
                     self.object_frame_count[text] = 1
 
+                # 객체가 처음 탐지되었을 때 출력하는 코드.
+                if text not in self.detected_object_list:
+                    object_name = re.sub(r'[0-9]+', '', text)
+                    if fw.pushIntensity() == 1:
+                        fcm.sendPush(self.object_dict[object_name], self.token)
+                    self.detected_object_list.append(text)
+                    cv2.imwrite(
+                        f"static/images/{datetime.now().strftime('%Y-%m-%d')}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S').replace(':','')}_{text.replace('_','')}.jpeg",
+                        frame,
+                    )
+                    # fw.storagePush("image", object_name,
+                    #                datetime.now().strftime('%Y-%m-%d'))
+                    # print(f"{text} has been detected...")
+                    # 데이터베이스에 객체 정보 저장
+                    self.dbmodule.insertInfo(re.sub(r'[0-9]+', '', text))
+
+                # 매 객체를 출력하는 코드. 주석 해제할 경우 너무 많이 출력이 된다.
+                # print(f"{self.detected_object_list} has been detecting...")
+
                 # extract the bounding box coordinates
                 (x, y) = (int(box[0]), int(box[1]))
                 (w, h) = (int(box[2]), int(box[3]))
@@ -199,7 +245,8 @@ class Yolo:
                 # color = [int(c) for c in COLORS[classIDs[i]]]
                 # cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
 
-                color = [int(c) for c in self.COLORS[indexIDs[i] % len(self.COLORS)]]
+                color = [int(c)
+                         for c in self.COLORS[indexIDs[i] % len(self.COLORS)]]
                 cv2.rectangle(frame, (x, y), (w, h), color, 2)
 
                 # 바운딩 박스 중앙의 선 출력
@@ -212,21 +259,23 @@ class Yolo:
                 # cv2.line(frame, p0, p1, color, 3)
 
                 cv2.putText(
-                    frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+                    frame, text, (x, y -
+                                  5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
                 )
                 i += 1
 
         # total count 출력
         count_text = ""
-        now = datetime.datetime.now().strftime("%Y%m%d")
-        self.object_to_json[now] = []
+        # now = datetime.now().strftime("%Y-%m-%d")
+        # self.object_to_json[now] = []
         for object in object_count:
             count_text += f"{object}: {object_count[object]} "
 
-            object_dict = OrderedDict()
-            object_dict["name"] = object
-            object_dict["count"] = object_count[object]
-            self.object_to_json[now].append(object_dict)
+        #     object_dict = OrderedDict()
+        #     object_dict["name"] = object
+        #     object_dict["count"] = object_count[object]
+        #     self.object_to_json[now].append(object_dict)
+
         cv2.putText(
             frame,
             count_text,

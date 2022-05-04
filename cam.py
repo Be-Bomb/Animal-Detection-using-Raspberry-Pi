@@ -1,7 +1,7 @@
 import socket
 import time
 from imutils.video import VideoStream
-import imagezmq
+from utils import imagezmq
 import argparse
 
 

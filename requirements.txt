@@ -1,12 +1,9 @@
-# capstone
-# imutils
 opencv-python==4.5.3.56
 imagezmq
 Flask
-# refer: https://github.com/eplatero97/Object-Detection-and-Tracking-with-YOLOv3-SORT
-# opencv-python==4.1.0
 numpy==1.18.1
 numba==0.52.0
 imutils==0.5.4
 filterpy==1.4.5
 scipy==1.4.1
+PyMySQL

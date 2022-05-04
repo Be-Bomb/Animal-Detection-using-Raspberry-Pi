@@ -15,7 +15,7 @@
 프로그램을 실행시키기 위하여 아래의 코드를 터미널에 입력하여 라이브러리들을 설치한다.
 
 ```Shell
-pip3 install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 # How to use
@@ -24,16 +24,19 @@ pip3 install -r requirements.txt
 
 ## 주의사항
 
--   [server.py](https://github.com/thispath98/Animal-Detection-using-Raspberry-Pi/tree/master/server.py)를 우선적으로 PC, 개인 노트북, 서버에서 실행한다. 그 이후 라즈베리 파이에서 [cam.py](https://github.com/thispath98/Animal-Detection-using-Raspberry-Pi/tree/master/cam.py)를 실행한다.
--   서버와 라즈베리 파이는 `동일한 네트워크 환경`(공유기 등)에 존재해야 한다.
+- [server.py](https://github.com/thispath98/Animal-Detection-using-Raspberry-Pi/tree/master/server.py)를 우선적으로 PC, 개인 노트북, 서버에서 실행한다. 그 이후 라즈베리 파이에서 [cam.py](https://github.com/thispath98/Animal-Detection-using-Raspberry-Pi/tree/master/cam.py)를 실행한다.
+- 서버와 라즈베리 파이는 `동일한 네트워크 환경`(공유기 등)에 존재해야 한다.
 
 ## 1. Server
 
 ### optional arguments
 
 ```Shell
-python3 server.py -h
-usage: server.py [-h] [--input INPUT] [--weights WEIGHTS] [--configure CONFIGURE] [--label LABEL] [--confidence CONFIDENCE] [--threshold THRESHOLD]
+$ python server.py -h
+usage: server.py [-h] [--input INPUT] [--weights WEIGHTS]
+                 [--configure CONFIGURE] [--label LABEL]
+                 [--confidence CONFIDENCE] [--threshold THRESHOLD]
+                 [--frame FRAME]
 
 Server gets Raspberry pi's capture through zmq
 
@@ -48,20 +51,15 @@ optional arguments:
                         minimum confidence
   --threshold THRESHOLD
                         minimum threshold
+  --frame FRAME         threshold of frame count
 ```
 
 ```Shell
-python3 server.py --input {input}
+$ python server.py --input {input}
 
-e.g. python3 server.py              # 현재 pc에 연결된 웹캠으로 송출
-     python3 server.py --input pi   # pi로부터 동영상 받아 송출
-     python3 server.py --input data/car_on_road.mp4 # 동영상 송출
-```
-
-### Real use
-
-```Shell
-python3 server.py
+e.g. python server.py              # 현재 pc에 연결된 웹캠으로 송출
+    python server.py --input pi   # pi로부터 동영상 받아 송출
+    python server.py --input data/car_on_road.mp4 # 동영상 송출
 ```
 
 ## 2. Raspberry Pi
@@ -69,7 +67,7 @@ python3 server.py
 ### optional arguments
 
 ```Shell
-python3 cam.py -h
+python cam.py -h
 usage: cam.py [-h] --ip IP
 
 Raspberry pi passes its video capture to server
@@ -80,19 +78,17 @@ optional arguments:
 ```
 
 ```Shell
-python3 cam.py --ip {server_ip}
+python cam.py --ip {server_ip}
 
-e.g. python3 cam.py --ip 192.168.0.19
+e.g. python cam.py --ip 192.168.0.19
 ```
 
-### Real use
-
-```Shell
-python3 cam.py --ip 192.168.0.19
+```
+python server.py --weights data/yolov4_tiny_class4.weights --configure data/yolov4_tiny_class4.cfg --label data/yolo_class4.names --input pi
 ```
 
 # Reference
 
 https://github.com/jeffbass/imagezmq
 
-https://github.com/kairess/cctv_raspberrypi
+https://github.com/eplatero97/Object-Detection-and-Tracking-with-YOLOv3-SORT
